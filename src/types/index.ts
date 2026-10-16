@@ -1,0 +1,73 @@
+/**
+ * Modelos de Dominio - Feria Imperio
+ * Definiciones de tipos estrictas para el ecosistema de feriantes y catálogo digital.
+ */
+
+export type Rubro =
+  | 'artesanias'
+  | 'ceramica'
+  | 'gastronomia'
+  | 'marroquineria'
+  | 'madera'
+  | 'indumentaria';
+
+export interface RubroInfo {
+  id: Rubro;
+  label: string;
+  icon: string;
+  description: string;
+}
+
+export type UbicacionFeria = 'parque_sarmiento' | 'paseo_andino' | 'ambos';
+
+export interface Feriante {
+  id: string;
+  nombreComercio: string;
+  nombreResponsable: string;
+  bio: string;
+  avatarUrl: string;
+  bannerUrl: string;
+  rubroPrincipal: Rubro;
+  ubicacionFeria: UbicacionFeria;
+  puestoNumero: string;
+  findeConfirmado: boolean;
+  whatsapp: string; // Formato internacional, ej: "5493581234567"
+  instagram?: string;
+}
+
+export interface Producto {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  precio: number; // En Pesos Argentinos ($ ARS)
+  rubro: Rubro;
+  ferianteId: string;
+  ferianteNombre: string;
+  imagenUrl: string;
+  enStock: boolean;
+  destacado: boolean;
+  especificaciones?: Record<string, string>;
+}
+
+export interface ConsultaContacto {
+  id?: string;
+  nombreCompleto: string;
+  nombreEmprendimiento: string;
+  email: string;
+  whatsapp: string;
+  rubro: Rubro;
+  mensaje: string;
+  fechaEnvio?: string;
+}
+
+export interface FiltrosCatalogo {
+  busqueda: string;
+  rubro: Rubro | 'todos';
+  soloDisponibles: boolean;
+  orden: 'destacados' | 'precio_menor' | 'precio_mayor';
+}
+
+/**
+ * Estados estandarizados de UI (4 Estados) para componentes con carga asíncrona
+ */
+export type UIStatus = 'idle' | 'loading' | 'success' | 'empty' | 'error';

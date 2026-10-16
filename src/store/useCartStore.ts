@@ -1,0 +1,91 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { Producto } from '../types';
+
+export interface CartItem {
+  producto: Producto;
+  cantidad: number;
+}
+
+interface CartStore {
+  items: CartItem[];
+  isOpen: boolean;
+  addItem: (producto: Producto) => void;
+  removeItem: (productoId: string) => void;
+  updateQuantity: (productoId: string, cantidad: number) => void;
+  clearCart: () => void;
+  openCart: () => void;
+  closeCart: () => void;
+  toggleCart: () => void;
+  getTotalItems: () => number;
+  getTotalPrice: () => number;
+}
+
+export const useCartStore = create<CartStore>()(
+  persist(
+    (set, get) => ({
+      items: [],
+      isOpen: false,
+
+      addItem: (producto: Producto) => {
+        set((state) => {
+          const existing = state.items.find((item) => item.producto.id === producto.id);
+          if (existing) {
+            return {
+              items: state.items.map((item) =>
+                item.producto.id === producto.id
+                  ? { ...item, cantidad: item.cantidad + 1 }
+                  : item
+              ),
+              isOpen: true,
+            };
+          }
+          return {
+            items: [...state.items, { producto, cantidad: 1 }],
+            isOpen: true,
+          };
+        });
+      },
+
+      removeItem: (productoId: string) => {
+        set((state) => ({
+          items: state.items.filter((item) => item.producto.id !== productoId),
+        }));
+      },
+
+      updateQuantity: (productoId: string, cantidad: number) => {
+        if (cantidad <= 0) {
+          get().removeItem(productoId);
+          return;
+        }
+        set((state) => ({
+          items: state.items.map((item) =>
+            item.producto.id === productoId ? { ...item, cantidad } : item
+          ),
+        }));
+      },
+
+      clearCart: () => {
+        set({ items: [] });
+      },
+
+      openCart: () => set({ isOpen: true }),
+      closeCart: () => set({ isOpen: false }),
+      toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
+
+      getTotalItems: () => {
+        return get().items.reduce((total, item) => total + item.cantidad, 0);
+      },
+
+      getTotalPrice: () => {
+        return get().items.reduce(
+          (total, item) => total + item.producto.precio * item.cantidad,
+          0
+        );
+      },
+    }),
+    {
+      name: 'feria_imperio_cart',
+    }
+  )
+);
