@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   X,
-  Store,
   Lock,
   UserCheck,
   AlertCircle,
@@ -119,8 +118,12 @@ export const LoginModal = ({ onShowToast }: LoginModalProps) => {
           <div className="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-white/10 blur-xl pointer-events-none" />
           <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner text-white">
-                <Store className="w-6 h-6" />
+              <div className="w-12 h-12 rounded-2xl bg-white p-1 flex items-center justify-center shadow-md border border-white/30 shrink-0">
+                <img
+                  src="/logo.png"
+                  alt="Logo Feria Imperio"
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div>
                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/25 text-[11px] font-bold tracking-wide uppercase">

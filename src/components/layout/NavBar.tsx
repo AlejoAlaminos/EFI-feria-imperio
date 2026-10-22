@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Store,
   Search,
   Menu,
   X,
@@ -55,8 +54,12 @@ export const NavBar = ({ busqueda, onBusquedaChange }: NavBarProps) => {
         <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-terracotta flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
-              <Store className="w-5 h-5 sm:w-6 sm:h-6" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white p-1 flex items-center justify-center shadow-md border border-sand-300 dark:border-charcoal-700 group-hover:scale-105 transition-transform shrink-0">
+              <img
+                src="/logo.png"
+                alt="Logo Feria Imperio"
+                className="w-full h-full object-contain"
+              />
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-lg sm:text-xl text-terracotta tracking-tight leading-none">

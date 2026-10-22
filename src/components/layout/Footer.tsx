@@ -1,4 +1,4 @@
-import { Store, Heart, MessageCircle, Instagram, MapPin } from 'lucide-react';
+import { Heart, MessageCircle, Instagram, MapPin } from 'lucide-react';
 
 export const Footer = () => {
   return (
@@ -8,8 +8,12 @@ export const Footer = () => {
           {/* Column 1: Brand Info */}
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-terracotta flex items-center justify-center text-white shadow-md">
-                <Store className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-2xl bg-white p-1 flex items-center justify-center shadow-md border border-sand-300 dark:border-charcoal-700 shrink-0">
+                <img
+                  src="/logo.png"
+                  alt="Logo Feria Imperio"
+                  className="w-full h-full object-contain"
+                />
               </div>
               <span className="font-extrabold text-xl text-terracotta tracking-tight">
                 Feria Imperio
