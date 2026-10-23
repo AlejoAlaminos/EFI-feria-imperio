@@ -35,6 +35,18 @@ export interface Feriante {
   instagram?: string;
 }
 
+export interface UsuarioComprador {
+  id: string;
+  nombre: string;
+  email: string;
+  telefono?: string;
+  avatarUrl: string;
+  ubicacion?: string;
+  rol: 'comprador';
+}
+
+export type RolUsuario = 'feriante' | 'comprador';
+
 export interface Producto {
   id: string;
   titulo: string;

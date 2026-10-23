@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { X, Trash2, Plus, Minus, ShoppingBag, MessageCircle, ArrowRight } from 'lucide-react';
 import { useCartStore } from '../../store/useCartStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { formatARS, buildWhatsAppLink } from '../../utils/formatters';
 
 interface CartDrawerProps {
@@ -35,12 +36,15 @@ export const CartDrawer = ({ telefonoFeria = '5493584112233' }: CartDrawerProps)
 
   if (!isOpen) return null;
 
+  const { currentComprador } = useAuthStore();
   const totalItems = getTotalItems();
   const totalPrice = getTotalPrice();
 
   // Generador de mensaje consolidado para WhatsApp
   const generarMensajeWhatsApp = () => {
-    let msg = '¡Hola! Estuve armando mi lista de productos en Feria Imperio:\n\n';
+    let msg = currentComprador
+      ? `¡Hola! Soy ${currentComprador.nombre}. Estuve armando mi lista de productos en Feria Imperio:\n\n`
+      : '¡Hola! Estuve armando mi lista de productos en Feria Imperio:\n\n';
     items.forEach((item) => {
       msg += `• ${item.cantidad}x ${item.producto.titulo} (${item.producto.ferianteNombre}) - ${formatARS(
         item.producto.precio * item.cantidad
@@ -71,7 +75,7 @@ export const CartDrawer = ({ telefonoFeria = '5493584112233' }: CartDrawerProps)
               </div>
               <div>
                 <h3 className="font-extrabold text-base sm:text-lg text-charcoal-900 dark:text-white leading-tight">
-                  Mi Lista de Feria
+                  {currentComprador ? `Lista de ${currentComprador.nombre}` : 'Mi Lista de Feria'}
                 </h3>
                 <span className="text-xs text-charcoal-500 dark:text-sand-400">
                   {totalItems} {totalItems === 1 ? 'artículo' : 'artículos'} seleccionados

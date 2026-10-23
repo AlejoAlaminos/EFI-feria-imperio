@@ -14,11 +14,22 @@ export const HeroBanner = () => {
           <span>Próxima Feria: Este Fin de Semana • 16:00 a 22:00 hs</span>
         </div>
 
+        {/* Brand Logo in Hero */}
+        <div className="flex justify-center mb-6">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden bg-white shadow-xl border border-sand-300 dark:border-charcoal-700 p-2 transition-transform hover:scale-105">
+            <img
+              src="/logo.png"
+              alt="Logo Feria Imperio"
+              className="w-full h-full object-contain"
+            />
+          </div>
+        </div>
+
         {/* Main Value Proposition Title */}
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-charcoal-900 dark:text-white max-w-4xl mx-auto leading-tight sm:leading-none mb-6">
-          El corazón de las ferias de Río Cuarto,{' '}
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-charcoal-900 dark:text-white max-w-4xl mx-auto leading-tight mb-6">
+          El corazón de las ferias de{' '}
           <span className="text-terracotta underline decoration-terracotta-300 underline-offset-8">
-            disponible 24/7.
+            Río Cuarto
           </span>
         </h1>
 

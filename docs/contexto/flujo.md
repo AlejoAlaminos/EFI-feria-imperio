@@ -33,7 +33,7 @@ flowchart TD
 5. Puede consultar disponibilidad directamente por WhatsApp o agregar artículos a su lista de presupuesto.
 
 ### 1.2 Flujo B: Autenticación de Feriantes y Gestión de Mi Taller (`/admin`)
-1. El artesano hace clic en el botón *"Soy Feriante"* (o *"Ingreso Feriantes"* en mobile) en la barra de navegación.
+1. El artesano hace clic en el botón *"Iniciar Sesión"* en la barra de navegación.
 2. Se abre el **Modal Integrado de Ingreso** (`LoginModal`), donde puede:
    - Iniciar sesión con su nombre de puesto/responsable y contraseña (`feria123`).
    - O utilizar el **Acceso Rápido de Demostración** (1 click sobre su avatar).
@@ -47,6 +47,15 @@ flowchart TD
 ### 1.3 Flujo C: Postulación o Contacto Ferial
 1. El artesano o visitante completa el formulario en la portada (Nombre, Emprendimiento, WhatsApp, Rubro y Mensaje).
 2. El sistema valida los datos y muestra un Toast feedback exitoso confirmando la recepción.
+
+### 1.4 Flujo D: Autenticación de Usuario Comprador (Vecino de Río Cuarto)
+1. El visitante hace clic en *"Iniciar Sesión"* en la barra de navegación superior.
+2. Selecciona la pestaña **[Soy Comprador]** (Portal Vecinos).
+3. Puede ingresar su nombre/correo y contraseña (`comprador123`) o seleccionar un perfil de comprador demo con 1 click (María Gómez, Lucas Rossi o Valentina Torres).
+4. Al ingresar:
+   - La barra de navegación centraliza la búsqueda y muestra su avatar con el badge *"Comprador Ferial"*.
+   - El menú de usuario le permite abrir directamente *"Mi Lista de Compras"*, *"Explorar Puestos y Ferias"* o *"Cerrar Sesión"*.
+   - Los pedidos enviados a los artesanos por WhatsApp personalizan el saludo con el nombre del comprador conectado.
 
 ---
 

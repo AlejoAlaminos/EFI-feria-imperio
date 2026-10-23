@@ -29,7 +29,7 @@ interface AdminPageProps {
 
 export const AdminPage = ({ onShowToast }: AdminPageProps) => {
   const navigate = useNavigate();
-  const { currentFeriante, isAuthenticated, openLoginModal, logout } = useAuthStore();
+  const { currentFeriante, userRole, isAuthenticated, openLoginModal, logout } = useAuthStore();
   const [feriantes, setFeriantes] = useState<Feriante[]>([]);
   const [selectedFerianteId, setSelectedFerianteId] = useState<string>(
     currentFeriante?.id || 'fer-01'
@@ -166,7 +166,9 @@ export const AdminPage = ({ onShowToast }: AdminPageProps) => {
               Acceso a Mi Taller
             </h1>
             <p className="text-xs sm:text-sm text-charcoal-600 dark:text-sand-300 leading-relaxed">
-              Para gestionar el inventario de tu puesto, modificar precios y actualizar el stock para la feria de este fin de semana, por favor iniciá sesión.
+              {userRole === 'comprador'
+                ? 'Actualmente estás conectado como usuario comprador. El taller de inventario y edición de precios es exclusivo para feriantes y artesanos registrados.'
+                : 'Para gestionar el inventario de tu puesto, modificar precios y actualizar el stock para la feria de este fin de semana, por favor iniciá sesión.'}
             </p>
           </div>
 

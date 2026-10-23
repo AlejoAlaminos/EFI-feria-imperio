@@ -68,14 +68,56 @@
   2. `tailwind-patterns`: Orientada a Tailwind CSS v4 (`@theme`), incompatible con la configuración de TailwindCSS v3 del proyecto.
 - **Consecuencias**: Conjunto de skills 100% afinado al proyecto, sin riesgo de alucinaciones sintácticas de Tailwind v4 ni reglas ajenas al ecosistema ferial.
 
+---
+
+### [ADR-010] · [2026-10-22 15:40] Integración del Logotipo Oficial y Favicon del Navegador
+- **Contexto**: Se requería incorporar el logotipo oficial de Feria Imperio (isologo con monograma "R", gazebo con toldo multicolor, leyenda "Feria Imperio" y ondas alusivas al río y espacio verde) en la interfaz del portal y como favicon en la pestaña del navegador.
+- **Decisión**: 
+  1. Alojar el recurso gráfico en `public/logo.png` y `public/favicon.png` para entrega estática nativa en Vite.
+  2. Actualizar `index.html` vinculando el favicon con `<link rel="icon" type="image/png" href="/logo.png" />`.
+  3. Reemplazar el icono genérico en `NavBar.tsx`, `Footer.tsx` y `LoginModal.tsx` con el logo enmarcado en un contenedor con borde y contraste apto tanto para Modo Claro como Modo Oscuro.
+  4. Limpiar dependencias e importaciones sin uso (DoD: compilación TypeScript estricta aprobada sin advertencias).
+- **Consecuencias**: Identidad visual unificada, profesional y consistente en todas las vistas y en la pestaña del navegador.
 
 ---
 
-### [ADR-010] � [2026-10-22 15:40] Integraci�n del Logotipo Oficial y Favicon del Navegador
-- **Contexto**: Se requer�a incorporar el logotipo oficial de Feria Imperio (isologo con monograma "R", gazebo con toldo multicolor, leyenda "Feria Imperio" y ondas alusivas al r�o y espacio verde) en la interfaz del portal y como favicon en la pesta�a del navegador.
-- **Decisi�n**: 
-  1. Alojar el recurso gr�fico en `public/logo.png` y `public/favicon.png` para entrega est�tica nativa en Vite.
-  2. Actualizar `index.html` vinculando el favicon con `<link rel="icon" type="image/png" href="/logo.png" />`.
-  3. Reemplazar el icono gen�rico en `NavBar.tsx`, `Footer.tsx` y `LoginModal.tsx` con el logo enmarcado en un contenedor con borde y contraste apto tanto para Modo Claro como Modo Oscuro.
-  4. Limpiar dependencias e importaciones sin uso (DoD: compilaci�n TypeScript estricta aprobada sin advertencias).
-- **Consecuencias**: Identidad visual unificada, profesional y consistente en todas las vistas y en la pesta�a del navegador.
+### [ADR-011] · [2026-10-23 11:50] Incorporación de Políticas de Privacidad en Footer y Modal Accesible
+- **Contexto**: Se solicitó incorporar "Políticas de Privacidad" como un nuevo ítem debajo de los existentes en la sección de navegación del pie de página.
+- **Decisión**: Agregar el ítem `Políticas de Privacidad` en la lista de enlaces de `Footer.tsx` y conectar un modal interactivo y accesible (`PrivacyModal.tsx`) que detalla el marco legal (Ley 25.326 de la República Argentina), la privacidad de datos feriales, el almacenamiento local sin rastreadores invasivos y el trato directo productor-consumidor.
+- **Consecuencias**: Cumplimiento ético y legal, transparencia institucional hacia feriantes y visitantes, y navegación unificada sin alterar rutas existentes.
+
+---
+
+### [ADR-012] · [2026-10-23 12:08] Actualización de Copyright y Redes Sociales SVG en Barra Inferior del Footer
+- **Contexto**: Se requería actualizar la firma legal a `Copyright © -2026- Vertex Solutions S.A.S.`, remover el bloque "Hecho con amor" y reemplazarlo en el extremo derecho por iconos vectoriales SVG de redes sociales (Facebook, Instagram y YouTube).
+- **Decisión**: En `Footer.tsx`, se actualizó el texto de copyright, se eliminó la dependencia de `Heart` y se implementaron botones de enlace con SVGs inline nativos optimizados, accesibles (`aria-label`) y con estilos consistentes a los tokens de tema claro/oscuro.
+- **Consecuencias**: Código limpio sin assets externos pesados, estética institucional profesional y compatibilidad visual en todos los dispositivos.
+
+---
+
+### [ADR-013] · [2026-10-23 12:16] Creación de Columna Exclusiva "Guías" en Footer con Modal Integrado
+- **Contexto**: Para mejorar la jerarquía de contenidos y no saturar la columna de Navegación, se solicitó independizar las guías en su propia sección dedicada dentro del pie de página.
+- **Decisión**: Reestructurar el grid del footer a 4 columnas responsivas (`sm:grid-cols-2 lg:grid-cols-4`), crear la columna independiente `Guías` con accesos a `Guía de Usuario` y `Guía de Feriante`, y preservar en `Navegación` únicamente los enlaces estructurales y de privacidad. Ambas guías abren el componente interactivo [`GuidesModal.tsx`](file:///c:/iTec/programacion_2/EFI/src/components/common/GuidesModal.tsx) sincronizando automáticamente la pestaña correspondiente.
+- **Consecuencias**: Mayor legibilidad, distribución visual equilibrada y navegación intuitiva en dispositivos móviles, tablets y monitores.
+
+---
+
+### [ADR-014] · [2026-10-23 12:35] Autenticación Dual (Comprador / Feriante) y Centralización de Barra de Búsqueda
+- **Contexto**: Los visitantes y vecinos de Río Cuarto necesitaban identificarse como usuarios compradores para personalizar sus listas de compras, consultas y experiencia ferial, además de requerir una barra y botón de búsqueda centralizados y destacados en la barra de navegación.
+- **Decisión**:
+  1. Extender `useAuthStore` y los tipos (`UsuarioComprador`, `RolUsuario`) admitiendo rol dual (`feriante` | `comprador`) con persistencia en `localStorage`.
+  2. Rediseñar `LoginModal` incorporando pestañas adaptativas `[Soy Comprador]` (Portal Vecinos) y `[Soy Feriante]` (Acceso Ferial), con soporte de perfiles demo en 1 click para ambos roles y los 4 estados de UI.
+  3. Rediseñar `NavBar` estructurando el header con la barra de búsqueda y botón "Buscar" situados en el centro geométrico de la pantalla (Desktop y Mobile).
+  4. Agregar menú desplegable específico para compradores (`Mi Lista de Compras`, `Explorar Puestos`, `Cerrar Sesión`) y personalizar el mensaje de WhatsApp del carrito con el nombre del comprador conectado.
+- **Consecuencias**: Experiencia de usuario inmersiva para toda la comunidad ferial (vecinos y puesteros), navegación más simétrica y clara, y control de acceso contextual sin fricción.
+
+---
+
+### [ADR-015] · [2026-10-23 13:05] Integración de Identidad Visual (Logo Oficial) en Barra de Navegación, Título Principal y Pestaña Web
+- **Contexto**: Se requería unificar la identidad gráfica sustituyendo los iconos genéricos por el logo oficial de Feria Imperio tanto en la cabecera (junto al buscador) como en el banner principal (hero) y el pie de página, además de actualizar el lema principal eliminando la frase "disponible 24/7".
+- **Decisión**:
+  1. Incorporar el asset `logo.png` en `public/` y referenciarlo como favicon principal y `apple-touch-icon` en `index.html`.
+  2. Sustituir el icono genérico de tienda en `NavBar.tsx` por el isotipo oficial en contenedor responsivo estilizado.
+  3. En `HeroBanner.tsx`, integrar el logo emblemático sobre el título principal y ajustar el título de cabecera a *"El corazón de las ferias de Río Cuarto"* con énfasis tipográfico en terracota, suprimiendo *"disponible 24/7"*.
+  4. Sincronizar la marca en la columna principal de `Footer.tsx` para mantener total coherencia de diseño.
+- **Consecuencias**: Identidad visual corporativa cohesiva, mayor reconocimiento de marca en el portal web y reducción de ruido textual en la propuesta de valor ferial.
