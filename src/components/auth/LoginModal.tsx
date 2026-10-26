@@ -14,6 +14,7 @@ import {
   User,
   Mail,
   MapPin,
+  UserPlus,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { ferianteRepository } from '../../repositories';
@@ -28,16 +29,20 @@ export const LoginModal = ({ onShowToast }: LoginModalProps) => {
   const navigate = useNavigate();
   const {
     loginModalOpen,
+    loginModalRole,
+    loginModalMode,
     closeLoginModal,
     login,
     loginDirecto,
     loginComprador,
     loginDirectoComprador,
+    registrarComprador,
     isLoading,
     error,
   } = useAuthStore();
 
   const [rolActivo, setRolActivo] = useState<RolUsuario>('comprador');
+  const [modoComprador, setModoComprador] = useState<'login' | 'register'>('login');
 
   // Formulario Feriante
   const [usuarioFeriante, setUsuarioFeriante] = useState('');
@@ -45,15 +50,23 @@ export const LoginModal = ({ onShowToast }: LoginModalProps) => {
   const [feriantesLista, setFeriantesLista] = useState<Feriante[]>([]);
   const [cargandoLista, setCargandoLista] = useState(true);
 
-  // Formulario Comprador
+  // Formulario Comprador Login
   const [usuarioComprador, setUsuarioComprador] = useState('');
   const [contraseniaComprador, setContraseniaComprador] = useState('comprador123');
 
+  // Formulario Comprador Registro
+  const [registroNombre, setRegistroNombre] = useState('');
+  const [registroEmail, setRegistroEmail] = useState('');
+  const [registroContrasenia, setRegistroContrasenia] = useState('comprador123');
+  const [registroUbicacion, setRegistroUbicacion] = useState('Río Cuarto, Córdoba');
+
   const [loginExitoso, setLoginExitoso] = useState<string | null>(null);
 
-  // Cargar lista de feriantes para el selector de demostración
+  // Sincronizar roles y modos al abrir modal
   useEffect(() => {
     if (loginModalOpen) {
+      setRolActivo(loginModalRole || 'comprador');
+      setModoComprador(loginModalMode || 'login');
       setCargandoLista(true);
       ferianteRepository
         .getAll()
@@ -65,7 +78,7 @@ export const LoginModal = ({ onShowToast }: LoginModalProps) => {
     } else {
       setLoginExitoso(null);
     }
-  }, [loginModalOpen]);
+  }, [loginModalOpen, loginModalRole, loginModalMode]);
 
   // Manejo de tecla Escape
   useEffect(() => {
@@ -119,7 +132,7 @@ export const LoginModal = ({ onShowToast }: LoginModalProps) => {
     }, 600);
   };
 
-  // Submit para Compradores
+  // Submit para Compradores (Login)
   const handleSubmitComprador = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!usuarioComprador.trim()) return;
@@ -136,6 +149,32 @@ export const LoginModal = ({ onShowToast }: LoginModalProps) => {
     } else {
       if (onShowToast) {
         onShowToast('error', 'Error de Acceso', res.message);
+      }
+    }
+  };
+
+  // Submit para Compradores (Registro)
+  const handleRegisterComprador = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!registroNombre.trim() || !registroEmail.trim()) return;
+
+    const res = await registrarComprador(
+      registroNombre,
+      registroEmail,
+      registroContrasenia || 'comprador123',
+      registroUbicacion || 'Río Cuarto, Córdoba'
+    );
+    if (res.success) {
+      setLoginExitoso(res.message);
+      if (onShowToast) {
+        onShowToast('success', '¡Cuenta Creada!', res.message);
+      }
+      setTimeout(() => {
+        closeLoginModal();
+      }, 700);
+    } else {
+      if (onShowToast) {
+        onShowToast('error', 'Error en Registro', res.message);
       }
     }
   };
@@ -188,10 +227,18 @@ export const LoginModal = ({ onShowToast }: LoginModalProps) => {
               <div>
                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/25 text-[11px] font-bold tracking-wide uppercase">
                   <ShieldCheck className="w-3 h-3" />
-                  {rolActivo === 'feriante' ? 'Acceso Ferial' : 'Portal Vecinos'}
+                  {rolActivo === 'feriante'
+                    ? 'Acceso Ferial'
+                    : modoComprador === 'register'
+                    ? 'Registro Vecinos'
+                    : 'Portal Vecinos'}
                 </span>
                 <h2 id="login-modal-title" className="text-xl sm:text-2xl font-black tracking-tight mt-0.5">
-                  {rolActivo === 'feriante' ? 'Ingreso de Feriantes' : 'Ingreso de Compradores'}
+                  {rolActivo === 'feriante'
+                    ? 'Ingreso de Feriantes'
+                    : modoComprador === 'register'
+                    ? 'Crear Cuenta de Usuario'
+                    : 'Ingreso de Compradores'}
                 </h2>
               </div>
             </div>
@@ -207,6 +254,8 @@ export const LoginModal = ({ onShowToast }: LoginModalProps) => {
           <p className="text-xs text-white/90 mt-3 relative z-10 font-medium">
             {rolActivo === 'feriante'
               ? 'Accedé a tu taller digital para actualizar tu stock, precios y presencia en la feria.'
+              : modoComprador === 'register'
+              ? 'Creá tu cuenta de usuario normal para armar presupuestos, contactar feriantes y guardar puestos favoritos.'
               : 'Conectate para armar listas de pedidos, consultar directamente a los feriantes y guardar tus puestos favoritos.'}
           </p>
 
@@ -258,7 +307,7 @@ export const LoginModal = ({ onShowToast }: LoginModalProps) => {
                 <CheckCircle2 className="w-10 h-10 animate-bounce" />
               </div>
               <h3 className="text-lg font-bold text-charcoal-900 dark:text-white">
-                ¡Ingreso Exitoso!
+                ¡Operación Exitosa!
               </h3>
               <p className="text-sm text-charcoal-600 dark:text-sand-300">
                 {loginExitoso}
@@ -267,81 +316,244 @@ export const LoginModal = ({ onShowToast }: LoginModalProps) => {
           ) : rolActivo === 'comprador' ? (
             /* ================= VISTA TAB COMPRADOR ================= */
             <>
-              <form onSubmit={handleSubmitComprador} className="space-y-4">
-                {error && (
-                  <div
-                    className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex items-start gap-2.5 text-rose-800 dark:text-rose-300 text-xs animate-in slide-in-from-top-2"
-                    role="alert"
-                  >
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>{error}</span>
-                  </div>
-                )}
-
-                <div>
-                  <label
-                    htmlFor="login-comprador-nombre"
-                    className="block text-xs font-bold text-charcoal-700 dark:text-sand-300 uppercase tracking-wider mb-1.5"
-                  >
-                    Tu Nombre o Correo Electrónico
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-charcoal-400 dark:text-sand-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      id="login-comprador-nombre"
-                      type="text"
-                      value={usuarioComprador}
-                      onChange={(e) => setUsuarioComprador(e.target.value)}
-                      placeholder="Ej: María Gómez o maria.gomez@gmail.com"
-                      className="w-full bg-white dark:bg-charcoal-700 text-charcoal-900 dark:text-white placeholder:text-charcoal-400 dark:placeholder:text-sand-500 pl-10 pr-4 py-2.5 rounded-2xl text-sm border border-sand-300 dark:border-charcoal-600 focus:border-forest focus:ring-2 focus:ring-forest/20 focus:outline-none transition-all"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label
-                      htmlFor="login-comprador-password"
-                      className="block text-xs font-bold text-charcoal-700 dark:text-sand-300 uppercase tracking-wider"
-                    >
-                      Contraseña
-                    </label>
-                    <span className="text-[11px] text-forest dark:text-forest-400 font-medium">
-                      Clave demo: <code className="bg-sand-200 dark:bg-charcoal-600 px-1 py-0.5 rounded">comprador123</code>
-                    </span>
-                  </div>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-charcoal-400 dark:text-sand-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      id="login-comprador-password"
-                      type="password"
-                      value={contraseniaComprador}
-                      onChange={(e) => setContraseniaComprador(e.target.value)}
-                      className="w-full bg-white dark:bg-charcoal-700 text-charcoal-900 dark:text-white placeholder:text-charcoal-400 dark:placeholder:text-sand-500 pl-10 pr-4 py-2.5 rounded-2xl text-sm border border-sand-300 dark:border-charcoal-600 focus:border-forest focus:ring-2 focus:ring-forest/20 focus:outline-none transition-all"
-                      required
-                    />
-                  </div>
-                </div>
-
+              {/* Selector interno de modo comprador: Iniciar Sesión vs Crear Cuenta */}
+              <div className="flex items-center gap-2 p-1 bg-sand-200/80 dark:bg-charcoal-700 rounded-2xl mb-4 text-xs font-bold">
                 <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-3 px-4 rounded-2xl bg-forest hover:bg-forest-600 text-white font-bold text-sm shadow-md active:scale-98 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                  type="button"
+                  onClick={() => setModoComprador('login')}
+                  className={`flex-1 py-2 rounded-xl transition-all ${
+                    modoComprador === 'login'
+                      ? 'bg-white dark:bg-charcoal-800 text-forest dark:text-forest-300 shadow-xs'
+                      : 'text-charcoal-600 dark:text-sand-400 hover:text-charcoal-900 dark:hover:text-white'
+                  }`}
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Ingresando a la feria...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Iniciar Sesión como Comprador</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
+                  Iniciar Sesión
                 </button>
-              </form>
+                <button
+                  type="button"
+                  onClick={() => setModoComprador('register')}
+                  className={`flex-1 py-2 rounded-xl transition-all ${
+                    modoComprador === 'register'
+                      ? 'bg-white dark:bg-charcoal-800 text-forest dark:text-forest-300 shadow-xs'
+                      : 'text-charcoal-600 dark:text-sand-400 hover:text-charcoal-900 dark:hover:text-white'
+                  }`}
+                >
+                  Crear tu cuenta
+                </button>
+              </div>
+
+              {modoComprador === 'register' ? (
+                /* FORMULARIO DE REGISTRO COMPRADOR */
+                <form onSubmit={handleRegisterComprador} className="space-y-4">
+                  {error && (
+                    <div
+                      className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex items-start gap-2.5 text-rose-800 dark:text-rose-300 text-xs animate-in slide-in-from-top-2"
+                      role="alert"
+                    >
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  <div>
+                    <label
+                      htmlFor="register-comprador-nombre"
+                      className="block text-xs font-bold text-charcoal-700 dark:text-sand-300 uppercase tracking-wider mb-1.5"
+                    >
+                      Nombre y Apellido *
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-charcoal-400 dark:text-sand-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        id="register-comprador-nombre"
+                        type="text"
+                        value={registroNombre}
+                        onChange={(e) => setRegistroNombre(e.target.value)}
+                        placeholder="Ej: Laura Martínez"
+                        className="w-full bg-white dark:bg-charcoal-700 text-charcoal-900 dark:text-white placeholder:text-charcoal-400 dark:placeholder:text-sand-500 pl-10 pr-4 py-2.5 rounded-2xl text-sm border border-sand-300 dark:border-charcoal-600 focus:border-forest focus:ring-2 focus:ring-forest/20 focus:outline-none transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="register-comprador-email"
+                      className="block text-xs font-bold text-charcoal-700 dark:text-sand-300 uppercase tracking-wider mb-1.5"
+                    >
+                      Correo Electrónico *
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 text-charcoal-400 dark:text-sand-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        id="register-comprador-email"
+                        type="email"
+                        value={registroEmail}
+                        onChange={(e) => setRegistroEmail(e.target.value)}
+                        placeholder="ejemplo@correo.com"
+                        className="w-full bg-white dark:bg-charcoal-700 text-charcoal-900 dark:text-white placeholder:text-charcoal-400 dark:placeholder:text-sand-500 pl-10 pr-4 py-2.5 rounded-2xl text-sm border border-sand-300 dark:border-charcoal-600 focus:border-forest focus:ring-2 focus:ring-forest/20 focus:outline-none transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="register-comprador-password"
+                      className="block text-xs font-bold text-charcoal-700 dark:text-sand-300 uppercase tracking-wider mb-1.5"
+                    >
+                      Contraseña *
+                    </label>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-charcoal-400 dark:text-sand-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        id="register-comprador-password"
+                        type="password"
+                        value={registroContrasenia}
+                        onChange={(e) => setRegistroContrasenia(e.target.value)}
+                        placeholder="Mínimo 4 caracteres"
+                        className="w-full bg-white dark:bg-charcoal-700 text-charcoal-900 dark:text-white placeholder:text-charcoal-400 dark:placeholder:text-sand-500 pl-10 pr-4 py-2.5 rounded-2xl text-sm border border-sand-300 dark:border-charcoal-600 focus:border-forest focus:ring-2 focus:ring-forest/20 focus:outline-none transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="register-comprador-ubicacion"
+                      className="block text-xs font-bold text-charcoal-700 dark:text-sand-300 uppercase tracking-wider mb-1.5"
+                    >
+                      Barrio / Ubicación en Río Cuarto
+                    </label>
+                    <div className="relative">
+                      <MapPin className="w-4 h-4 text-charcoal-400 dark:text-sand-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        id="register-comprador-ubicacion"
+                        type="text"
+                        value={registroUbicacion}
+                        onChange={(e) => setRegistroUbicacion(e.target.value)}
+                        placeholder="Ej: Banda Norte, Centro, Alberdi..."
+                        className="w-full bg-white dark:bg-charcoal-700 text-charcoal-900 dark:text-white placeholder:text-charcoal-400 dark:placeholder:text-sand-500 pl-10 pr-4 py-2.5 rounded-2xl text-sm border border-sand-300 dark:border-charcoal-600 focus:border-forest focus:ring-2 focus:ring-forest/20 focus:outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full py-3 px-4 rounded-2xl bg-forest hover:bg-forest-600 text-white font-bold text-sm shadow-md active:scale-98 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Creando tu cuenta...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-4 h-4" />
+                        <span>Crear Cuenta como Usuario Normal</span>
+                      </>
+                    )}
+                  </button>
+
+                  <div className="text-center pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setModoComprador('login')}
+                      className="text-xs font-semibold text-forest dark:text-forest-400 hover:underline"
+                    >
+                      ¿Ya tenés cuenta? Iniciar sesión aquí
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* FORMULARIO DE LOGIN COMPRADOR */
+                <form onSubmit={handleSubmitComprador} className="space-y-4">
+                  {error && (
+                    <div
+                      className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex items-start gap-2.5 text-rose-800 dark:text-rose-300 text-xs animate-in slide-in-from-top-2"
+                      role="alert"
+                    >
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  <div>
+                    <label
+                      htmlFor="login-comprador-nombre"
+                      className="block text-xs font-bold text-charcoal-700 dark:text-sand-300 uppercase tracking-wider mb-1.5"
+                    >
+                      Tu Nombre o Correo Electrónico
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 text-charcoal-400 dark:text-sand-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        id="login-comprador-nombre"
+                        type="text"
+                        value={usuarioComprador}
+                        onChange={(e) => setUsuarioComprador(e.target.value)}
+                        placeholder="Ej: María Gómez o maria.gomez@gmail.com"
+                        className="w-full bg-white dark:bg-charcoal-700 text-charcoal-900 dark:text-white placeholder:text-charcoal-400 dark:placeholder:text-sand-500 pl-10 pr-4 py-2.5 rounded-2xl text-sm border border-sand-300 dark:border-charcoal-600 focus:border-forest focus:ring-2 focus:ring-forest/20 focus:outline-none transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label
+                        htmlFor="login-comprador-password"
+                        className="block text-xs font-bold text-charcoal-700 dark:text-sand-300 uppercase tracking-wider"
+                      >
+                        Contraseña
+                      </label>
+                      <span className="text-[11px] text-forest dark:text-forest-400 font-medium">
+                        Clave demo: <code className="bg-sand-200 dark:bg-charcoal-600 px-1 py-0.5 rounded">comprador123</code>
+                      </span>
+                    </div>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-charcoal-400 dark:text-sand-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        id="login-comprador-password"
+                        type="password"
+                        value={contraseniaComprador}
+                        onChange={(e) => setContraseniaComprador(e.target.value)}
+                        className="w-full bg-white dark:bg-charcoal-700 text-charcoal-900 dark:text-white placeholder:text-charcoal-400 dark:placeholder:text-sand-500 pl-10 pr-4 py-2.5 rounded-2xl text-sm border border-sand-300 dark:border-charcoal-600 focus:border-forest focus:ring-2 focus:ring-forest/20 focus:outline-none transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full py-3 px-4 rounded-2xl bg-forest hover:bg-forest-600 text-white font-bold text-sm shadow-md active:scale-98 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Ingresando a la feria...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Iniciar Sesión como Comprador</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+
+                  <div className="text-center pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setModoComprador('register')}
+                      className="text-xs font-semibold text-forest dark:text-forest-400 hover:underline"
+                    >
+                      ¿No tenés cuenta todavía? Crear tu cuenta como usuario normal
+                    </button>
+                  </div>
+                </form>
+              )}
 
               {/* Separador */}
               <div className="relative flex items-center justify-center">

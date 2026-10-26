@@ -12,14 +12,17 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   loginModalOpen: boolean;
+  loginModalRole: RolUsuario;
+  loginModalMode: 'login' | 'register';
 
   // Acciones
-  openLoginModal: () => void;
+  openLoginModal: (role?: RolUsuario, mode?: 'login' | 'register') => void;
   closeLoginModal: () => void;
   login: (idOrNombre: string, contrasenia?: string) => Promise<{ success: boolean; message: string }>;
   loginDirecto: (feriante: Feriante) => void;
   loginComprador: (emailOrNombre: string, contrasenia?: string) => Promise<{ success: boolean; message: string }>;
   loginDirectoComprador: (comprador: UsuarioComprador) => void;
+  registrarComprador: (nombre: string, email: string, contrasenia?: string, ubicacion?: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
 }
 
@@ -33,11 +36,20 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
       loginModalOpen: false,
+      loginModalRole: 'comprador',
+      loginModalMode: 'login',
 
-      openLoginModal: () => set({ loginModalOpen: true, error: null }),
+      openLoginModal: (role: RolUsuario = 'comprador', mode: 'login' | 'register' = 'login') =>
+        set({
+          loginModalOpen: true,
+          loginModalRole: role,
+          loginModalMode: mode,
+          error: null,
+        }),
+
       closeLoginModal: () => set({ loginModalOpen: false, error: null }),
 
-      // Inicio de sesión para Feriantes
+      // Inicio de sesi�n para Feriantes
       login: async (idOrNombre: string, contrasenia: string = 'feria123') => {
         set({ isLoading: true, error: null });
 
@@ -62,18 +74,18 @@ export const useAuthStore = create<AuthState>()(
             });
             return {
               success: false,
-              message: 'Puesto no encontrado. Selecciona uno de los puestos de demostración.',
+              message: 'Puesto no encontrado. Selecciona uno de los puestos de demostraci�n.',
             };
           }
 
           if (contrasenia.trim() !== 'feria123' && contrasenia.trim() !== 'admin') {
             set({
               isLoading: false,
-              error: 'Contraseña incorrecta. Puedes usar la clave estándar "feria123".',
+              error: 'Contrase�a incorrecta. Puedes usar la clave est�ndar "feria123".',
             });
             return {
               success: false,
-              message: 'Contraseña incorrecta. Usa "feria123".',
+              message: 'Contrase�a incorrecta. Usa "feria123".',
             };
           }
 
@@ -89,12 +101,12 @@ export const useAuthStore = create<AuthState>()(
 
           return {
             success: true,
-            message: `¡Bienvenido de vuelta, ${ferianteEncontrado.nombreResponsable}! (${ferianteEncontrado.nombreComercio})`,
+            message: `�Bienvenido de vuelta, ${ferianteEncontrado.nombreResponsable}! (${ferianteEncontrado.nombreComercio})`,
           };
         } catch {
           set({
             isLoading: false,
-            error: 'Ocurrió un error al verificar tus credenciales. Reintenta.',
+            error: 'Ocurri� un error al verificar tus credenciales. Reintenta.',
           });
           return {
             success: false,
@@ -115,7 +127,7 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      // Inicio de sesión para Compradores
+      // Inicio de sesi�n para Compradores
       loginComprador: async (emailOrNombre: string, contrasenia: string = 'comprador123') => {
         set({ isLoading: true, error: null });
 
@@ -132,27 +144,27 @@ export const useAuthStore = create<AuthState>()(
               c.id.toLowerCase() === termino
           );
 
-          // Si no está registrado en el mock pero ingresó un nombre válido, generamos su sesión personalizada
+          // Si no est� registrado en el mock pero ingres� un nombre v�lido, generamos su sesi�n personalizada
           if (!comprador) {
             if (termino.length < 2) {
               set({
                 isLoading: false,
-                error: 'Por favor, ingresá un nombre o correo válido.',
+                error: 'Por favor, ingres� un nombre o correo v�lido.',
               });
               return {
                 success: false,
-                message: 'Nombre o email demasiado corto.',
+                message: 'Ingresa un nombre o correo v�lido.',
               };
             }
 
             comprador = {
-              id: `comp-${Date.now().toString(36)}`,
+              id: `comp-${Date.now()}`,
               nombre: emailOrNombre.trim(),
               email: emailOrNombre.includes('@')
                 ? emailOrNombre.trim()
                 : `${emailOrNombre.trim().toLowerCase().replace(/\s+/g, '')}@vecino.com`,
               avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
-              ubicacion: 'Río Cuarto',
+              ubicacion: 'R�o Cuarto',
               rol: 'comprador',
             };
           }
@@ -165,11 +177,11 @@ export const useAuthStore = create<AuthState>()(
           ) {
             set({
               isLoading: false,
-              error: 'Contraseña demo inválida. Usa "comprador123" o al menos 4 caracteres.',
+              error: 'Contrase�a demo inv�lida. Usa "comprador123" o al menos 4 caracteres.',
             });
             return {
               success: false,
-              message: 'Contraseña demo incorrecta.',
+              message: 'Contrase�a demo incorrecta.',
             };
           }
 
@@ -185,16 +197,74 @@ export const useAuthStore = create<AuthState>()(
 
           return {
             success: true,
-            message: `¡Bienvenido/a a Feria Imperio, ${comprador.nombre}!`,
+            message: `�Bienvenido/a a Feria Imperio, ${comprador.nombre}!`,
           };
         } catch {
           set({
             isLoading: false,
-            error: 'Ocurrió un error al iniciar sesión como comprador.',
+            error: 'Ocurri� un error al iniciar sesi�n como comprador.',
           });
           return {
             success: false,
-            message: 'Error al conectar la sesión de comprador.',
+            message: 'Error al conectar la sesi�n de comprador.',
+          };
+        }
+      },
+
+      // Registro nuevo para Compradores
+      registrarComprador: async (
+        nombre: string,
+        email: string,
+        _contrasenia: string = 'comprador123',
+        ubicacion: string = 'R�o Cuarto, C�rdoba'
+      ) => {
+        set({ isLoading: true, error: null });
+
+        await new Promise((resolve) => setTimeout(resolve, 350));
+
+        try {
+          if (!nombre.trim() || !email.trim()) {
+            set({
+              isLoading: false,
+              error: 'Por favor, complet� tu nombre y correo electr�nico.',
+            });
+            return {
+              success: false,
+              message: 'Complet� todos los campos requeridos.',
+            };
+          }
+
+          const nuevoComprador: UsuarioComprador = {
+            id: `comp-${Date.now()}`,
+            nombre: nombre.trim(),
+            email: email.trim().toLowerCase(),
+            avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+            ubicacion: ubicacion.trim() || 'R�o Cuarto, C�rdoba',
+            rol: 'comprador',
+          };
+
+          set({
+            currentComprador: nuevoComprador,
+            currentFeriante: null,
+            userRole: 'comprador',
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+            loginModalOpen: false,
+          });
+
+          return {
+            success: true,
+            message: `�Cuenta creada exitosamente! Bienvenido/a a Feria Imperio, ${nuevoComprador.nombre}.`,
+          };
+        } catch {
+          set({
+            isLoading: false,
+            error: 'No se pudo crear la cuenta de usuario. Intent� nuevamente.',
+          });
+          return {
+            success: false,
+            message: 'Error al registrar la cuenta de usuario.',
           };
         }
       },

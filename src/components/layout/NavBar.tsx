@@ -13,6 +13,8 @@ import {
   ShieldCheck,
   User,
   Compass,
+  UserPlus,
+  Store,
 } from 'lucide-react';
 import { ThemeToggle } from '../common/ThemeToggle';
 import { useCartStore } from '../../store/useCartStore';
@@ -116,28 +118,6 @@ export const NavBar = ({ busqueda, onBusquedaChange }: NavBarProps) => {
 
           {/* 3. Acciones y Perfil (Derecha) */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Desktop Navigation Links */}
-            <nav className="hidden xl:flex items-center gap-1 mr-1">
-              <Link
-                to="/"
-                className="px-3 py-2 rounded-xl text-xs font-bold text-charcoal-700 dark:text-sand-200 hover:text-terracotta dark:hover:text-terracotta-300 hover:bg-sand-200 dark:hover:bg-charcoal-700 transition-colors"
-              >
-                Directorio
-              </Link>
-              <a
-                href="/#ferias"
-                className="px-3 py-2 rounded-xl text-xs font-bold text-charcoal-700 dark:text-sand-200 hover:text-terracotta dark:hover:text-terracotta-300 hover:bg-sand-200 dark:hover:bg-charcoal-700 transition-colors"
-              >
-                Paseos
-              </a>
-              <a
-                href="/#contacto"
-                className="px-3 py-2 rounded-xl text-xs font-bold text-charcoal-700 dark:text-sand-200 hover:text-terracotta dark:hover:text-terracotta-300 hover:bg-sand-200 dark:hover:bg-charcoal-700 transition-colors"
-              >
-                Postularse
-              </a>
-            </nav>
-
             {/* Cart / Lista Button */}
             <button
               onClick={toggleCart}
@@ -157,15 +137,39 @@ export const NavBar = ({ busqueda, onBusquedaChange }: NavBarProps) => {
 
             {/* SECCIÓN DE AUTENTICACIÓN (COMPRADOR / FERIANTE) */}
             {!isAuthenticated ? (
-              /* Botón de Inicio de Sesión */
-              <button
-                onClick={openLoginModal}
-                className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-forest hover:bg-forest-600 text-white text-xs sm:text-sm font-bold shadow-sm active:scale-95 transition-all"
-                title="Iniciar sesión"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Iniciar Sesión</span>
-              </button>
+              <div className="hidden sm:flex items-center gap-1.5 lg:gap-2">
+                {/* 1. Crear tu cuenta como usuario normal */}
+                <button
+                  type="button"
+                  onClick={() => openLoginModal('comprador', 'register')}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-charcoal-700 dark:text-sand-200 hover:text-forest dark:hover:text-forest-400 hover:bg-sand-200 dark:hover:bg-charcoal-700 text-xs font-semibold transition-all active:scale-95"
+                  title="Crear tu cuenta como usuario normal"
+                >
+                  <UserPlus className="w-4 h-4 text-forest dark:text-forest-400" />
+                  <span>Crear tu cuenta como usuario normal</span>
+                </button>
+
+                {/* 2. Iniciar sesión */}
+                <button
+                  type="button"
+                  onClick={() => openLoginModal('comprador', 'login')}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-sand-300 dark:border-charcoal-600 hover:border-forest dark:hover:border-forest-400 text-charcoal-800 dark:text-sand-100 hover:bg-sand-100 dark:hover:bg-charcoal-800 text-xs font-bold transition-all active:scale-95"
+                  title="Iniciar sesión"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Iniciar sesión</span>
+                </button>
+
+                {/* 3. Postularme mi emprendimiento */}
+                <a
+                  href="/#contacto"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-terracotta hover:bg-terracotta-600 text-white text-xs font-bold shadow-xs active:scale-95 transition-all"
+                  title="Postularme mi emprendimiento"
+                >
+                  <Store className="w-4 h-4" />
+                  <span>Postularme mi emprendimiento</span>
+                </a>
+              </div>
             ) : userRole === 'comprador' && currentComprador ? (
               /* Dropdown Usuario Comprador */
               <div className="relative hidden sm:block" ref={dropdownRef}>
@@ -419,40 +423,42 @@ export const NavBar = ({ busqueda, onBusquedaChange }: NavBarProps) => {
             </div>
           ) : null}
 
-          <Link
-            to="/"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2.5 rounded-xl text-base font-semibold text-charcoal-800 dark:text-sand-100 hover:bg-sand-200 dark:hover:bg-charcoal-700"
-          >
-            Directorio de Puestos
-          </Link>
-          <a
-            href="/#ferias"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2.5 rounded-xl text-base font-semibold text-charcoal-800 dark:text-sand-100 hover:bg-sand-200 dark:hover:bg-charcoal-700"
-          >
-            Paseos de Ferias
-          </a>
-          <a
-            href="/#contacto"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2.5 rounded-xl text-base font-semibold text-charcoal-800 dark:text-sand-100 hover:bg-sand-200 dark:hover:bg-charcoal-700"
-          >
-            Postular mi Puesto
-          </a>
-
           <div className="pt-2">
             {!isAuthenticated ? (
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  openLoginModal();
-                }}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-forest text-white font-bold text-sm shadow-md"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Iniciar Sesión</span>
-              </button>
+              <div className="flex flex-col gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    openLoginModal('comprador', 'register');
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-sand-300 dark:border-charcoal-600 text-charcoal-800 dark:text-sand-100 hover:bg-sand-200 dark:hover:bg-charcoal-700 font-bold text-sm shadow-xs transition-all"
+                >
+                  <UserPlus className="w-4 h-4 text-forest dark:text-forest-400" />
+                  <span>Crear tu cuenta como usuario normal</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    openLoginModal('comprador', 'login');
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-forest hover:bg-forest-600 text-white font-bold text-sm shadow-md transition-all"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Iniciar sesión</span>
+                </button>
+
+                <a
+                  href="/#contacto"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-terracotta hover:bg-terracotta-600 text-white font-bold text-sm shadow-md transition-all text-center"
+                >
+                  <Store className="w-4 h-4" />
+                  <span>Postularme mi emprendimiento</span>
+                </a>
+              </div>
             ) : userRole === 'comprador' ? (
               <button
                 onClick={() => {

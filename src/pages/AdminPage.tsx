@@ -174,7 +174,7 @@ export const AdminPage = ({ onShowToast }: AdminPageProps) => {
 
           <div className="space-y-3 pt-2">
             <button
-              onClick={openLoginModal}
+              onClick={() => openLoginModal('feriante')}
               className="w-full py-3.5 px-6 rounded-2xl bg-terracotta hover:bg-terracotta-600 text-white font-bold text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
             >
               <LogIn className="w-4 h-4" />
