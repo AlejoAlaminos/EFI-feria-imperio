@@ -121,3 +121,16 @@
   3. En `HeroBanner.tsx`, integrar el logo emblemático sobre el título principal y ajustar el título de cabecera a *"El corazón de las ferias de Río Cuarto"* con énfasis tipográfico en terracota, suprimiendo *"disponible 24/7"*.
   4. Sincronizar la marca en la columna principal de `Footer.tsx` para mantener total coherencia de diseño.
 - **Consecuencias**: Identidad visual corporativa cohesiva, mayor reconocimiento de marca en el portal web y reducción de ruido textual en la propuesta de valor ferial.
+
+---
+
+### [ADR-016] · [2026-10-28 11:05] Implementación de Lógica de Búsqueda Integral (Puestos, Rubros y Artículos)
+- **Contexto**: Se requería que el buscador centralizado filtrara eficazmente por nombre del puesto, nombre del artesano responsable, número de gazebo/puesto físico, rubro comercial (con tolerancia a tildes) y artículos específicos de los catálogos.
+- **Decisión**:
+  1. Crear función utilitaria pura `normalizeSearchText` en `src/utils/formatters.ts` que suprime acentos/diacríticos y normaliza a minúsculas.
+  2. Extender el filtro en `MockFerianteRepository.ts` para evaluar en simultáneo: puesto, responsable, puesto físico, bio, rubro (id y etiquetas de `RUBROS_DATA`) y artículos asociados en `PRODUCTOS_MOCK`.
+  3. Extender `MockProductoRepository.ts` con normalización de búsqueda insensible a tildes.
+  4. Envolver la barra de búsqueda en `<form onSubmit>` en `NavBar.tsx`, habilitando envío por tecla Enter y clic en "Buscar" con redirección y scroll automático a `#tiendas`.
+  5. En `HomePage.tsx`, incorporar resumen de búsqueda y grilla contextual de artículos encontrados con soporte completo de modales y enlaces a WhatsApp.
+- **Consecuencias**: Búsqueda integral y fluida en toda la aplicación, cumpliendo el DoD y los 4 estados de UI sin alterar la persistencia ni agregar dependencias externas.
+

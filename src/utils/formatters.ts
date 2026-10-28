@@ -22,3 +22,17 @@ export function buildWhatsAppLink(telefono: string, mensaje: string): string {
   const encodedMsg = encodeURIComponent(mensaje);
   return `https://wa.me/${telefonoLimpio}?text=${encodedMsg}`;
 }
+
+/**
+ * Normaliza un texto para búsquedas insensibles a mayúsculas, minúsculas y tildes/acentos.
+ * Ejemplo: "Cerámica" -> "ceramica"
+ */
+export function normalizeSearchText(text: string): string {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+

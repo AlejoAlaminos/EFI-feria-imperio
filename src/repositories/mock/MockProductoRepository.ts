@@ -1,6 +1,7 @@
 import { PRODUCTOS_MOCK } from '../../data/mockData';
 import { FiltrosCatalogo, Producto, Rubro } from '../../types';
 import { IProductoRepository } from '../interfaces/IProductoRepository';
+import { normalizeSearchText } from '../../utils/formatters';
 
 export class MockProductoRepository implements IProductoRepository {
   private productos: Producto[] = [...PRODUCTOS_MOCK];
@@ -42,12 +43,16 @@ export class MockProductoRepository implements IProductoRepository {
 
     // 2. Filtro por texto de búsqueda
     if (filtros.busqueda.trim() !== '') {
-      const term = filtros.busqueda.toLowerCase().trim();
+      const term = normalizeSearchText(filtros.busqueda);
       resultado = resultado.filter(
         (p) =>
-          p.titulo.toLowerCase().includes(term) ||
-          p.descripcion.toLowerCase().includes(term) ||
-          p.ferianteNombre.toLowerCase().includes(term)
+          normalizeSearchText(p.titulo).includes(term) ||
+          normalizeSearchText(p.descripcion).includes(term) ||
+          normalizeSearchText(p.ferianteNombre).includes(term) ||
+          normalizeSearchText(p.rubro).includes(term) ||
+          Object.values(p.especificaciones || {}).some((spec) =>
+            normalizeSearchText(spec).includes(term)
+          )
       );
     }
 
