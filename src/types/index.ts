@@ -80,6 +80,26 @@ export interface FiltrosCatalogo {
 }
 
 /**
+ * Modelo de Postulación a la Feria Física (Reserva de Stand con Luz y Wi-Fi)
+ */
+export interface PostulacionStand {
+  id: string;
+  nombreCompleto: string;
+  nombreEmprendimiento: string;
+  telefono: string;
+  email: string;
+  rubro: Rubro;
+  descripcion: string;
+  ubicacionPreferencia: UbicacionFeria;
+  serviciosIncluidos: string[];
+  costoStand: number; // Por defecto $45.000 ARS
+  estadoPago: 'pendiente' | 'pagado';
+  linkPagoSimulado: string;
+  fechaCreacion: string;
+}
+
+/**
  * Estados estandarizados de UI (4 Estados) para componentes con carga asíncrona
  */
 export type UIStatus = 'idle' | 'loading' | 'success' | 'empty' | 'error';
+

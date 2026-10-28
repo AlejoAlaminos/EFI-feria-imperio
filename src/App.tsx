@@ -6,6 +6,7 @@ import { Toast } from './components/common/Toast';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
 import { CartDrawer } from './components/cart/CartDrawer';
 import { LoginModal } from './components/auth/LoginModal';
+import { PostulacionStandModal } from './components/stand/PostulacionStandModal';
 import { HomePage } from './pages/HomePage';
 import { StoreDetailPage } from './pages/StoreDetailPage';
 import { AdminPage } from './pages/AdminPage';
@@ -70,6 +71,10 @@ export default function App() {
 
         {/* Modal de Ingreso para Feriantes */}
         <LoginModal onShowToast={showToast} />
+
+        {/* Modal de Postulación a Stand Presencial con Link de Pago */}
+        <PostulacionStandModal onShowToast={showToast} />
+
 
         {/* Botón Sticky Flotante de WhatsApp para Celulares */}
         <FloatingWhatsApp />
