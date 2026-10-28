@@ -59,6 +59,18 @@ export const NavBar = ({ busqueda, onBusquedaChange }: NavBarProps) => {
     navigate('/');
   };
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (window.location.pathname !== '/') {
+      navigate('/');
+    }
+    setMobileMenuOpen(false);
+    setTimeout(() => {
+      document.getElementById('tiendas')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+
   return (
     <header className="sticky top-0 z-40 bg-sand/90 dark:bg-charcoal/90 backdrop-blur-md border-b border-sand-300 dark:border-charcoal-700 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -83,14 +95,19 @@ export const NavBar = ({ busqueda, onBusquedaChange }: NavBarProps) => {
           </Link>
 
           {/* 2. Barra y Botón de Búsqueda Centralizados (Centro) */}
-          <div className="hidden md:flex flex-1 justify-center max-w-md lg:max-w-lg mx-auto">
+          <form
+            onSubmit={handleSearchSubmit}
+            role="search"
+            aria-label="Búsqueda de puestos, rubros y artículos"
+            className="hidden md:flex flex-1 justify-center max-w-md lg:max-w-lg mx-auto"
+          >
             <div className="relative w-full flex items-center">
               <Search className="w-4 h-4 text-charcoal-400 dark:text-sand-400 absolute left-3.5 pointer-events-none" />
               <input
                 type="text"
                 value={busqueda}
                 onChange={(e) => onBusquedaChange(e.target.value)}
-                placeholder="Buscar puestos, artesanos o rubros..."
+                placeholder="Buscar puestos, rubros o artículos (ej: mate, cazuela)..."
                 className="w-full bg-sand-200 dark:bg-charcoal-700 text-charcoal-900 dark:text-white placeholder:text-charcoal-400 dark:placeholder:text-sand-500 pl-10 pr-24 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm border border-sand-300 dark:border-charcoal-600 focus:border-terracotta focus:bg-white dark:focus:bg-charcoal-800 focus:outline-none transition-all shadow-inner"
               />
               {busqueda.trim() !== '' && (
@@ -106,15 +123,15 @@ export const NavBar = ({ busqueda, onBusquedaChange }: NavBarProps) => {
               )}
               {/* Botón Centralizado de Búsqueda */}
               <button
-                type="button"
-                className="absolute right-1.5 px-3.5 py-1.5 rounded-full bg-terracotta hover:bg-terracotta-600 text-white text-xs font-bold shadow-xs active:scale-95 transition-all flex items-center gap-1.5"
+                type="submit"
+                className="absolute right-1.5 px-3.5 py-1.5 rounded-full bg-terracotta hover:bg-terracotta-600 text-white text-xs font-bold shadow-xs active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Buscar en la feria"
               >
                 <Search className="w-3 h-3" />
                 <span>Buscar</span>
               </button>
             </div>
-          </div>
+          </form>
 
           {/* 3. Acciones y Perfil (Derecha) */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -337,14 +354,19 @@ export const NavBar = ({ busqueda, onBusquedaChange }: NavBarProps) => {
         </div>
 
         {/* Barra de Búsqueda Mobile Centralizada con Botón */}
-        <div className="md:hidden pb-3">
+        <form
+          onSubmit={handleSearchSubmit}
+          role="search"
+          aria-label="Búsqueda móvil de puestos, rubros y artículos"
+          className="md:hidden pb-3"
+        >
           <div className="relative flex items-center">
             <Search className="w-4 h-4 text-charcoal-400 dark:text-sand-400 absolute left-3.5 pointer-events-none" />
             <input
               type="text"
               value={busqueda}
               onChange={(e) => onBusquedaChange(e.target.value)}
-              placeholder="Buscar puestos o artesanos..."
+              placeholder="Buscar puestos, rubros o artículos..."
               className="w-full bg-sand-200 dark:bg-charcoal-700 text-charcoal-900 dark:text-white placeholder:text-charcoal-400 dark:placeholder:text-sand-500 pl-10 pr-22 py-2 rounded-full text-xs border border-sand-300 dark:border-charcoal-600 focus:border-terracotta focus:outline-none"
             />
             {busqueda.trim() !== '' && (
@@ -358,13 +380,13 @@ export const NavBar = ({ busqueda, onBusquedaChange }: NavBarProps) => {
               </button>
             )}
             <button
-              type="button"
-              className="absolute right-1 px-3 py-1 rounded-full bg-terracotta text-white text-xs font-bold shadow-xs active:scale-95"
+              type="submit"
+              className="absolute right-1 px-3 py-1 rounded-full bg-terracotta text-white text-xs font-bold shadow-xs active:scale-95 cursor-pointer"
             >
               Buscar
             </button>
           </div>
-        </div>
+        </form>
       </div>
 
       {/* Menú Desplegable Móvil */}

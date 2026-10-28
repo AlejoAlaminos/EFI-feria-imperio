@@ -4,9 +4,12 @@ import { CategoryFilter } from '../components/catalog/CategoryFilter';
 import { StoreGrid } from '../components/stores/StoreGrid';
 import { FeriasSection } from '../components/ferias/FeriasSection';
 import { ContactForm } from '../components/contact/ContactForm';
+import { ProductCard } from '../components/catalog/ProductCard';
+import { ProductModal } from '../components/catalog/ProductModal';
 import { Feriante, Producto, Rubro, UbicacionFeria, UIStatus } from '../types';
 import { ferianteRepository, productoRepository } from '../repositories';
-import { Sparkles, MapPin, Calendar } from 'lucide-react';
+import { buildWhatsAppLink, formatARS } from '../utils/formatters';
+import { Sparkles, MapPin, Calendar, ShoppingBag } from 'lucide-react';
 
 interface HomePageProps {
   busqueda: string;
@@ -25,12 +28,31 @@ export const HomePage = ({
 
   const [feriantes, setFeriantes] = useState<Feriante[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
+  const [productosFiltrados, setProductosFiltrados] = useState<Producto[]>([]);
+  const [selectedProductModal, setSelectedProductModal] = useState<Producto | null>(null);
   const [status, setStatus] = useState<UIStatus>('loading');
 
   // Cargar productos para conteos de tiendas
   useEffect(() => {
     productoRepository.getAll().then(setProductos).catch(console.error);
   }, []);
+
+  // Filtrar productos cuando hay búsqueda activa
+  useEffect(() => {
+    if (!busqueda.trim()) {
+      setProductosFiltrados([]);
+      return;
+    }
+    productoRepository
+      .filtrar({
+        busqueda,
+        rubro: rubroActivo,
+        soloDisponibles: false,
+        orden: 'destacados',
+      })
+      .then(setProductosFiltrados)
+      .catch(console.error);
+  }, [busqueda, rubroActivo]);
 
   // Filtrar tiendas reactivamente
   const fetchFeriantes = useCallback(async () => {
@@ -137,16 +159,65 @@ export const HomePage = ({
 
         {/* Resumen de Búsqueda Activa */}
         {busqueda.trim() !== '' && (
-          <div className="mb-6 flex items-center justify-between bg-sand-200 dark:bg-charcoal-700 px-4 py-2.5 rounded-2xl text-xs">
-            <span className="text-charcoal-700 dark:text-sand-200">
-              Puestos coincidentes con: <strong>"{busqueda}"</strong>
-            </span>
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-sand-200 dark:bg-charcoal-700 px-4 py-3 rounded-2xl text-xs border border-sand-300 dark:border-charcoal-600 shadow-xs">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-terracotta shrink-0" />
+              <span className="text-charcoal-800 dark:text-sand-100">
+                Resultados para: <strong className="text-terracotta">"{busqueda}"</strong>
+                {' • '}
+                <span className="font-semibold">
+                  {feriantes.length} {feriantes.length === 1 ? 'puesto encontrado' : 'puestos encontrados'}
+                </span>
+                {productosFiltrados.length > 0 && (
+                  <span>
+                    {' y '}
+                    <strong className="text-forest dark:text-forest-400">
+                      {productosFiltrados.length} {productosFiltrados.length === 1 ? 'artículo coincidente' : 'artículos coincidentes'}
+                    </strong>
+                  </span>
+                )}
+              </span>
+            </div>
             <button
-              onClick={() => onBusquedaChange('')}
-              className="text-terracotta hover:underline font-bold"
+              onClick={handleResetFilters}
+              className="text-terracotta hover:underline font-bold self-start sm:self-auto cursor-pointer"
             >
               Limpiar búsqueda
             </button>
+          </div>
+        )}
+
+        {/* Sección de Artículos Coincidentes (si la búsqueda arroja creaciones específicas) */}
+        {busqueda.trim() !== '' && productosFiltrados.length > 0 && (
+          <div className="mb-10 p-5 sm:p-6 bg-white dark:bg-charcoal-800 rounded-3xl border border-sand-300 dark:border-charcoal-700 shadow-card">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-sand-200 dark:border-charcoal-700">
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="w-5 h-5 text-terracotta" />
+                <h3 className="text-base sm:text-lg font-extrabold text-charcoal-900 dark:text-white">
+                  Artículos encontrados ({productosFiltrados.length})
+                </h3>
+              </div>
+              <span className="text-xs text-charcoal-500 dark:text-sand-400 hidden sm:inline">
+                Creaciones que coinciden con "{busqueda}"
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {productosFiltrados.map((producto) => (
+                <ProductCard
+                  key={producto.id}
+                  producto={producto}
+                  onVerDetalle={setSelectedProductModal}
+                  onConsultarWhatsApp={(prod) => {
+                    const fer = feriantes.find((f) => f.id === prod.ferianteId);
+                    const tel = fer?.whatsapp || '5493584112233';
+                    const msg = `¡Hola! Vi en Feria Imperio tu producto "${prod.titulo}" (${formatARS(
+                      prod.precio
+                    )}) y me gustaría consultar disponibilidad.`;
+                    window.open(buildWhatsAppLink(tel, msg), '_blank');
+                  }}
+                />
+              ))}
+            </div>
           </div>
         )}
 
@@ -168,6 +239,21 @@ export const HomePage = ({
         onSuccessToast={(title, msg) => onShowToast('success', title, msg)}
         onErrorToast={(title, msg) => onShowToast('error', title, msg)}
       />
+
+      {/* Modal de Ficha Técnica cuando se abre un producto desde la búsqueda */}
+      {selectedProductModal && (
+        <ProductModal
+          producto={selectedProductModal}
+          onClose={() => setSelectedProductModal(null)}
+          ferianteTelefono={
+            feriantes.find((f) => f.id === selectedProductModal.ferianteId)?.whatsapp ||
+            '5493584112233'
+          }
+          ferianteUbicacion={
+            feriantes.find((f) => f.id === selectedProductModal.ferianteId)?.puestoNumero
+          }
+        />
+      )}
     </div>
   );
 };

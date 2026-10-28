@@ -1,6 +1,7 @@
-import { FERIANTES_MOCK } from '../../data/mockData';
+import { FERIANTES_MOCK, PRODUCTOS_MOCK, RUBROS_DATA } from '../../data/mockData';
 import { Feriante, UbicacionFeria } from '../../types';
 import { IFerianteRepository, FiltrosFeriante } from '../interfaces/IFerianteRepository';
+import { normalizeSearchText } from '../../utils/formatters';
 
 export class MockFerianteRepository implements IFerianteRepository {
   private feriantes: Feriante[] = [...FERIANTES_MOCK];
@@ -47,13 +48,43 @@ export class MockFerianteRepository implements IFerianteRepository {
     }
 
     if (filtros.busqueda && filtros.busqueda.trim() !== '') {
-      const q = filtros.busqueda.toLowerCase().trim();
-      lista = lista.filter(
-        (f) =>
-          f.nombreComercio.toLowerCase().includes(q) ||
-          f.nombreResponsable.toLowerCase().includes(q) ||
-          f.bio.toLowerCase().includes(q)
-      );
+      const q = normalizeSearchText(filtros.busqueda);
+      lista = lista.filter((f) => {
+        // 1. Nombre de puesto / comercio
+        const matchComercio = normalizeSearchText(f.nombreComercio).includes(q);
+        // 2. Nombre del artesano responsable
+        const matchResponsable = normalizeSearchText(f.nombreResponsable).includes(q);
+        // 3. Número o sector del puesto físico
+        const matchPuesto = normalizeSearchText(f.puestoNumero).includes(q);
+        // 4. Bio / descripción de la tienda
+        const matchBio = normalizeSearchText(f.bio).includes(q);
+        // 5. Rubro principal (identificador o etiqueta con tildes)
+        const matchRubro =
+          normalizeSearchText(f.rubroPrincipal).includes(q) ||
+          RUBROS_DATA.some(
+            (r) => r.id === f.rubroPrincipal && normalizeSearchText(r.label).includes(q)
+          );
+        // 6. Artículos y creaciones del puesto
+        const matchProductos = PRODUCTOS_MOCK.some(
+          (p) =>
+            p.ferianteId === f.id &&
+            (normalizeSearchText(p.titulo).includes(q) ||
+              normalizeSearchText(p.descripcion).includes(q) ||
+              normalizeSearchText(p.rubro).includes(q) ||
+              Object.values(p.especificaciones || {}).some((spec) =>
+                normalizeSearchText(spec).includes(q)
+              ))
+        );
+
+        return (
+          matchComercio ||
+          matchResponsable ||
+          matchPuesto ||
+          matchBio ||
+          matchRubro ||
+          matchProductos
+        );
+      });
     }
 
     return lista;
