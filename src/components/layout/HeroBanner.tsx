@@ -1,8 +1,15 @@
-import { Calendar, MapPin, ArrowRight, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
+import { Calendar, MapPin, ArrowRight, ShieldCheck, Store } from 'lucide-react';
+import { usePostulacionStore } from '../../store/usePostulacionStore';
 
 export const HeroBanner = () => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const openPostulacionModal = usePostulacionStore((state) => state.openModal);
+
+
   return (
-    <section id="inicio" className="relative overflow-hidden py-12 sm:py-20 lg:py-24">
+    <section id="inicio" className="relative overflow-hidden py-12 sm:py-16 lg:py-20">
       {/* Decorative Background Elements */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-terracotta-200/40 dark:bg-terracotta-900/10 blur-[100px] rounded-full pointer-events-none -z-10" />
       <div className="absolute top-10 right-10 w-72 h-72 bg-forest-200/30 dark:bg-forest-900/10 blur-[80px] rounded-full pointer-events-none -z-10" />
@@ -14,14 +21,60 @@ export const HeroBanner = () => {
           <span>Próxima Feria: Este Fin de Semana • 16:00 a 22:00 hs</span>
         </div>
 
-        {/* Brand Logo in Hero */}
-        <div className="flex justify-center mb-6">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden bg-white shadow-xl border border-sand-300 dark:border-charcoal-700 p-2 transition-transform hover:scale-105">
-            <img
-              src="/logo.png"
-              alt="Logo Feria Imperio"
-              className="w-full h-full object-contain"
-            />
+        {/* Featured Promotional Banner with CTA */}
+        <div className="relative max-w-4xl mx-auto mb-10 rounded-3xl overflow-hidden border border-sand-300 dark:border-charcoal-700 shadow-2xl group bg-sand-200 dark:bg-charcoal-800 aspect-[16/9] sm:aspect-[21/9] md:aspect-[2.4/1]">
+          {/* 1. Loading State */}
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 bg-sand-200 dark:bg-charcoal-800 animate-pulse flex items-center justify-center">
+              <span className="text-xs font-semibold text-charcoal-400 dark:text-sand-400">
+                Cargando banner de la feria...
+              </span>
+            </div>
+          )}
+
+          {/* 2. Error Fallback State */}
+          {imageError && (
+            <div className="absolute inset-0 bg-gradient-to-br from-terracotta-700 to-forest-900 flex flex-col items-center justify-center p-6 text-white text-center">
+              <Store className="w-10 h-10 mb-2 opacity-80" />
+              <p className="text-lg font-bold">Feria Imperio</p>
+              <p className="text-xs text-sand-200">Artesanías y emprendedores de Río Cuarto</p>
+            </div>
+          )}
+
+          {/* 3. Success State: Image Rendering */}
+          <img
+            src="/nuevo-banner.png"
+            alt="Feria Imperio - Paseo de artesanos y emprendedores en Río Cuarto"
+            className={`w-full h-full object-cover object-center transition-all duration-700 group-hover:scale-105 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
+            loading="eager"
+            fetchPriority="high"
+          />
+
+          {/* Accessible Overlay & "Postularme" Call to Action */}
+          <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 bg-gradient-to-t from-black/85 via-black/45 to-transparent flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
+            <div className="text-white text-center sm:text-left drop-shadow-sm">
+              <p className="text-xs sm:text-sm font-bold text-sand-100">
+                ¿Tenés un emprendimiento o elaborás artesanías?
+              </p>
+              <p className="text-[11px] sm:text-xs text-sand-300 hidden sm:block">
+                Sumá tu puesto a los paseos del Andino y Parque Sarmiento.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={openPostulacionModal}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-terracotta hover:bg-terracotta-600 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer"
+              aria-label="Abrir formulario para postularme a la feria física"
+            >
+              <Store className="w-4 h-4" />
+              <span>Postularme</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 
