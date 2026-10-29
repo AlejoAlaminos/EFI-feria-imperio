@@ -177,11 +177,13 @@ export const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-sand-300 dark:border-charcoal-700 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left text-xs text-charcoal-500 dark:text-sand-400">
-          <p>Copyright © -2026- Vertex Solutions S.A.S.</p>
+        <div className="pt-8 border-t border-sand-300 dark:border-charcoal-700 grid grid-cols-1 md:grid-cols-3 items-center gap-4 text-xs text-charcoal-500 dark:text-sand-400">
+          <p className="text-center md:text-left">
+            Copyright © -2026- Vertex Solutions S.A.S.
+          </p>
 
-          {/* Quiénes somos - Enlace a Vertex Tech */}
-          <div className="flex items-center gap-2">
+          {/* Quiénes somos - Enlace a Vertex Tech (Centrado) */}
+          <div className="flex items-center justify-center gap-2">
             <span className="text-charcoal-600 dark:text-sand-300 font-medium">Quiénes somos</span>
             <a
               href="https://www.vertextech.com.ar"
@@ -202,6 +204,8 @@ export const Footer = () => {
               <ExternalLink className="w-3 h-3 text-charcoal-400 dark:text-sand-400 group-hover:text-terracotta" />
             </a>
           </div>
+
+          <div className="hidden md:block" aria-hidden="true" />
         </div>
       </div>
 
